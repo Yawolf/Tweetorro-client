@@ -2,6 +2,7 @@ package client
 
 import java.rmi.registry.Registry
 import java.rmi.registry.LocateRegistry
+import java.util.Calendar
 import scala.annotation.tailrec
 import scala.language.postfixOps
 
@@ -50,10 +51,19 @@ object Client {
 
     (StartState,"")
   }
+  def follow(stub: server.ServerTrait,userLogged: String) : Unit = {
+    val userToFollow = readLine("User:")
+    
+    val ret = stub follow(userLogged,userToFollow)
+    if (ret)
+      println("User followed successfully")
+    else
+      println("Error! Something ocurred =( ")
+  }
 
   def startMenu(stub: server.ServerTrait, user: String): (State,String) = {
     println("What do you want to do?")
-    val option = readLine("1 for login, 2 for register, e for exit >>> ")
+    val option = readLine("1 for login, 2 for register, 3 for exit >>> ")
     option match {
       case "1" => (Login,"")
       case "2" => (CreateUser,"")
@@ -72,14 +82,23 @@ object Client {
     else {
       println("Sending you tweet...")
       val message = msg mkString " "
-      val ret = stub sendTweet(user,message)
-      ret match {
-        case true => println("Tweew sent! :D")
-        case _ => println("Woops! Something went wrong :(")
+
+      if (testTweet(message)) {
+        println("Tweet so long, short it!")
+        (MainState,user)
+      } else{
+        val format = new java.text.SimpleDateFormat("dd-MM-yyyy")
+        val ret = stub sendTweet((user,message,format.format(new java.util.Date())))
+          ret match {
+            case true => println("Tweew sent! :D")
+            case _ => println("Woops! Something went wrong :(")
+          }
       }
     }
     (MainState,user)
   }
+
+  def testTweet(message: String): Boolean = message.length <= 140
 
   def retweet(stub: server.ServerTrait, user: String, msg: List[String])
       : (State,String) = {
@@ -227,15 +246,34 @@ object Client {
     }
   }
 
-  def getTweets(stub: server.ServerTrait, user: String): (State,String) = {
+  def getTweets(stub: server.ServerTrait, user: String, n: Int): (State,String) = {
+    if (n <= 0)
+      println("Seriously? That's not a real Natural Number! Well Zero really is, but... please")
+    else {
+      val ret = stub getTweets(user,n)
+      ret match {
+        case List() => println("Oh man! you don't have any tweet! :(")
+        case List(x) => List(x).map(x => printFormatTweet(x))
+        case _ => println("You will never see this message!")
+      }
+    }
     (MainState,user)
+  }
+
+  def printFormatTweet(tweet: (String, String, String, String)): Unit = {
+    println(s"""Tweet from: ${tweet._1}
+Date: ${tweet._3}
+TweetID: ${tweet._4} 
+Message: ${tweet._2}
+
+=====================================================================""")
   }
 
   def selectFunction(stub: server.ServerTrait,
     user: String): (State,String) = {
     val f::tail = readLine("[? for help] >>> ").split(" ").toList
     f match {
-      case "getweets" => getTweets(stub,user)
+      case "getweets" => getTweets(stub,user,tail.head.toInt)
       case "tweet" => sendTweet(stub,user,tail)
       case "retweet" => retweet(stub,user,tail)
       case "follow" => funcFollow(stub,user,tail)
@@ -243,10 +281,7 @@ object Client {
       case "following" => getFollows("following",stub,user,tail.head.toInt)
       case "followers" => getFollows("followers",stub,user,tail.head.toInt)
       case "profile" => (ProfileState,user)
-      case "logout" => {
-        logout(stub,user)
-        (Stop,user)
-      }
+      case "logout" => (Logout,user)
       case "h" => {
         println("This is the help, YAY!")
         println("\tgetweets [N] => receive the first N tweets, default 10 :)")
@@ -277,6 +312,10 @@ object Client {
       case CreateUser => repl(stub,createUserCli(stub))
       case MainState => repl(stub,selectFunction(stub,sa._2))
       case ProfileState => repl(stub,profileRepl(stub,sa._2))
+      case Logout => {
+        logout(stub,sa._2)
+        (Stop,sa._2)
+      }
       case Stop =>
         println("Bye!! See you soon! :D")
     }
@@ -286,7 +325,7 @@ object Client {
     try {
       val registry = LocateRegistry getRegistry("localhost")
       val stub = registry.lookup("tweetorro").asInstanceOf[server.ServerTrait]
-      repl(StartState,(stub,""))
+      repl(stub,(StartState,""))
     } catch {
       case e: Exception => e printStackTrace
     }

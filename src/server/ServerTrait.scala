@@ -11,9 +11,12 @@ trait ServerTrait extends Remote {
 
   @throws(classOf[RemoteException])
   def login(user: String, pass: String): Boolean
+  
+  @throws(classOf[RemoteException])
+  def setProfile(nombre: String, alias: String): Boolean
 
   @throws(classOf[RemoteException])
-  def sendTweet(user: String, message: String): Boolean
+  def sendTweet(tweet: (String, String, String)): Boolean
 
   @throws(classOf[RemoteException])
   def retweet(user: String, tweetID: String): Boolean
@@ -38,4 +41,7 @@ trait ServerTrait extends Remote {
 
   @throws(classOf[RemoteException])
   def modifyRemoteProfile(user: String, param: String): Boolean
+
+  @throws(classOf[RemoteException])
+  def getTweets(user: String, number: Int): List[(String, String, String, String)]
 }
