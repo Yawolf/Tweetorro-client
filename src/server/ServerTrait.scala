@@ -40,7 +40,7 @@ trait ServerTrait extends Remote {
   def checkRemoteProfile(user: String, param: String): Option[String]
 
   @throws(classOf[RemoteException])
-  def modifyRemoteProfile(user: String, param: String): Boolean
+  def modifyRemoteProfile(user: String, param: String, value: String): Boolean
 
   @throws(classOf[RemoteException])
   def getTweets(user: String, number: Int): List[(String, String, String, String)]

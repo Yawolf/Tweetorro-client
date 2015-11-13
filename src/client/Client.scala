@@ -200,15 +200,16 @@ object Client {
 
   def modifyProfile(stub: server.ServerTrait, user: String, param: List[String])
       : (State,String) = {
-    if (param.length != 1) {
+    if (param.length != 2) {
       println("Why you don't what to use the 'h' command? T_T")
       (ProfileState, user)
     } else {
-      val paramStr = param mkString " "
-      val ret = stub modifyRemoteProfile(user,paramStr)
+      val paramStr = param.head
+      val paramVal = param.tail mkString " "
+      val ret = stub modifyRemoteProfile(user,paramStr,paramVal)
       ret match {
         case true => {
-          println(s"@ >>>>>> $user modified with $paramStr")
+          println(s"@ >>>>>> $user modified $paramStr with $paramVal")
           (ProfileState, user)
         }
         case _ => {
@@ -227,7 +228,7 @@ object Client {
       case "h" => {
         println("""Modifiying your profile eh? I can help you!
     check <PARAM> => Check your actual PARAM value
-    modify <PARAM> => Modify your actual PARAM value
+    modify <PARAM> <NEWVALUE> => Modify your actual PARAM value
         PARAMS:
            username => Your user name (that's obvious, isn't it?)
            realname => Your real name
