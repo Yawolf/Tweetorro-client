@@ -18,6 +18,8 @@ object State {
 }
 
 import State._
+import server.Shared._
+
 object Client {
 
   def login(stub: server.ServerTrait, t: Int): (State,String) = {
@@ -63,7 +65,7 @@ object Client {
 
   def startMenu(stub: server.ServerTrait, user: String): (State,String) = {
     println("What do you want to do?")
-    val option = readLine("1 for login, 2 for register, 3 for exit >>> ")
+    val option = readLine("1 for login, 2 for register, e for exit >>> ")
     option match {
       case "1" => (Login,"")
       case "2" => (CreateUser,"")
@@ -87,18 +89,15 @@ object Client {
         println("Tweet so long, short it!")
         (MainState,user)
       } else{
-        val format = new java.text.SimpleDateFormat("dd-MM-yyyy")
-        val ret = stub sendTweet((user,message,format.format(new java.util.Date())))
-          ret match {
-            case true => println("Tweew sent! :D")
-            case _ => println("Woops! Something went wrong :(")
-          }
+        val format = new java.text.SimpleDateFormat("dd-MM-yyyy-HH:mm")
+        stub sendTweet(DMTweet(user,message,format.format(new java.util.Date())))
+        println("Tweew sent! :D")
       }
     }
     (MainState,user)
   }
 
-  def testTweet(message: String): Boolean = message.length <= 140
+  def testTweet(message: String): Boolean = message.length > 140
 
   def retweet(stub: server.ServerTrait, user: String, msg: List[String])
       : (State,String) = {
@@ -106,7 +105,7 @@ object Client {
       println("Hey! Give me a tweet ID!!")
     else {
       val tweetID = msg.head
-      println("Let's retweet this tweet: $tweetID")
+      println(s"Let's retweet this tweet: $tweetID")
       val ret = stub retweet(user,tweetID)
       ret match {
         case true => println("The tweet was retweeted!! Yay! Party! :D")
@@ -144,8 +143,13 @@ object Client {
     (MainState,user)
   }
 
-  def getFollows(f: String, stub: server.ServerTrait, user: String, n: Int)
+  def getFollows(f: String, stub: server.ServerTrait, user: String, list: List[String])
       : (State,String) = {
+    val n = if (list.isEmpty)
+      10
+    else
+      list.head.toInt
+
     if (n <= 0)
       println("Seriously? That's not a real Natural Number! Well Zero really is, but... please")
     else {
@@ -157,7 +161,7 @@ object Client {
       ret match {
         case List() => println("So sad bro... No one! :'(")
         case _ =>
-          ret.map(x => println(">> $x"))
+          ret.map(x => println(s">> $x"))
       }
     }
     (MainState,user)
@@ -168,7 +172,7 @@ object Client {
     ret match {
       case true => {
         println("User successfully loged out")
-        (Stop,user)
+        (StartState,user)
       }
       case _ => {
         println("This message souldn't be showed never!")
@@ -205,7 +209,7 @@ object Client {
       (ProfileState, user)
     } else {
       val paramStr = param.head
-      val paramVal = param.tail mkString " "
+      val paramVal = param.tail.head
       val ret = stub modifyRemoteProfile(user,paramStr,paramVal)
       ret match {
         case true => {
@@ -225,15 +229,16 @@ object Client {
     f match {
       case "check" => checkProfile(stub,user,tail)
       case "modify" => modifyProfile(stub,user,tail)
-      case "h" => {
+      case "?" => {
         println("""Modifiying your profile eh? I can help you!
     check <PARAM> => Check your actual PARAM value
     modify <PARAM> <NEWVALUE> => Modify your actual PARAM value
         PARAMS:
-           username => Your user name (that's obvious, isn't it?)
-           realname => Your real name
-           passwd => Your password (only modify (obviously too (yeah! lisp style!)))
-           workst => Your current workstation, somethibg as... Awesomeness Inc.""")
+           USERNAME => Your user name (that's obvious, isn't it?)
+           REALNAME => Your real name
+           PASSWORD => Your password (only modify (obviously too (yeah! lisp style!)))
+           WORKST => Your current workstation, somethibg as... Awesomeness Inc.
+    e => Exit profile menu""")
         (ProfileState,user)
       }
       case "e" => {
@@ -247,43 +252,45 @@ object Client {
     }
   }
 
-  def getTweets(stub: server.ServerTrait, user: String, n: Int): (State,String) = {
+  def getTweets(stub: server.ServerTrait, user: String, list: List[String])
+      : (State,String) = {
+    
+    val n = list.headOption.map(_.toInt).getOrElse(10)
+
     if (n <= 0)
       println("Seriously? That's not a real Natural Number! Well Zero really is, but... please")
     else {
       val ret = stub getTweets(user,n)
       ret match {
         case List() => println("Oh man! you don't have any tweet! :(")
-        case List(x) => List(x).map(x => printFormatTweet(x))
-        case _ => println("You will never see this message!")
+        case x => x.map(printFormatTweet _)
       }
     }
     (MainState,user)
   }
 
-  def printFormatTweet(tweet: (String, String, String, String)): Unit = {
-    println(s"""Tweet from: ${tweet._1}
-Date: ${tweet._3}
-TweetID: ${tweet._4} 
-Message: ${tweet._2}
-
-=====================================================================""")
+  def printFormatTweet(tweet: DMT): Unit = {
+    println(s"""=====================================================================
+Tweet from: ${tweet.user}
+Date: ${tweet.date}
+TweetID: ${tweet.id} 
+Message: ${tweet.msg}""")
   }
 
   def selectFunction(stub: server.ServerTrait,
     user: String): (State,String) = {
     val f::tail = readLine("[? for help] >>> ").split(" ").toList
     f match {
-      case "getweets" => getTweets(stub,user,tail.head.toInt)
+      case "getweets" => getTweets(stub,user,tail)
       case "tweet" => sendTweet(stub,user,tail)
       case "retweet" => retweet(stub,user,tail)
       case "follow" => funcFollow(stub,user,tail)
       case "unfollow" => funcUnfollow(stub,user,tail)
-      case "following" => getFollows("following",stub,user,tail.head.toInt)
-      case "followers" => getFollows("followers",stub,user,tail.head.toInt)
+      case "following" => getFollows("following",stub,user,tail)
+      case "followers" => getFollows("followers",stub,user,tail)
       case "profile" => (ProfileState,user)
-      case "logout" => (Logout,user)
-      case "h" => {
+      case "logout" => logout(stub,user)
+      case "?" => {
         println("This is the help, YAY!")
         println("\tgetweets [N] => receive the first N tweets, default 10 :)")
         println("\ttweet <message> => Sends a new tweet!")
@@ -292,8 +299,9 @@ Message: ${tweet._2}
         println("\tunfollow user_ID => Stop following the user_ID profile")
         println("\tfollowing => Returns a list of Following profiles")
         println("\tfollowers => Return a list of your followers profiles")
+        println("\tprofile => Here you can check and modify your profile")
         println("\tlogout => just... Logout :D")
-        println("\th => show this help")
+        println("\t? => show this help")
         println("\nAs you can se, I'm so easy to use ;D")
         (MainState,user)
       }
@@ -306,7 +314,6 @@ Message: ${tweet._2}
 
   @tailrec
   def repl(stub: server.ServerTrait, sa: (State, String)): Unit = {
-    println("Welcome to Tweetorro terminal App!")
     sa._1 match {
       case StartState => repl(stub,startMenu(stub,""))
       case Login => repl(stub,login(stub,3))
@@ -326,6 +333,9 @@ Message: ${tweet._2}
     try {
       val registry = LocateRegistry getRegistry("localhost")
       val stub = registry.lookup("tweetorro").asInstanceOf[server.ServerTrait]
+
+      stub.test(Test(n => println(n)))
+      println("Welcome to Tweetorro terminal App!")
       repl(stub,(StartState,""))
     } catch {
       case e: Exception => e printStackTrace
