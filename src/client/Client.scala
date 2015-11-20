@@ -5,6 +5,7 @@ import java.rmi.registry.LocateRegistry
 import java.util.Calendar
 import scala.annotation.tailrec
 import scala.language.postfixOps
+import java.rmi.server.UnicastRemoteObject
 
 sealed abstract class State
 object State {
@@ -32,6 +33,8 @@ object Client {
       val ret = stub login(user,pass)
       if (ret) {
         println("Welcome back! :D")
+        val callback: ClientTrait = new ClientTraitImpl(user)
+        stub registerForCallback(user,callback)
         (MainState,user)
       }
       else {
@@ -334,7 +337,7 @@ Message: ${tweet.msg}""")
       val registry = LocateRegistry getRegistry("localhost")
       val stub = registry.lookup("tweetorro").asInstanceOf[server.ServerTrait]
 
-      stub.test(Test(n => println(n)))
+      //stub.test(Test(n => println(n)))
       println("Welcome to Tweetorro terminal App!")
       repl(stub,(StartState,""))
     } catch {
