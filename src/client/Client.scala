@@ -15,6 +15,7 @@ object State {
   case object Stop extends State
   case object CreateUser extends State
   case object ProfileState extends State
+  case object DirectMState extends State
 }
 
 import State._
@@ -53,6 +54,7 @@ object Client {
 
     (StartState,"")
   }
+
   def follow(stub: server.ServerTrait,userLogged: String) : Unit = {
     val userToFollow = readLine("User:")
     
@@ -77,8 +79,9 @@ object Client {
     }
   }
 
-  def sendTweet(stub: server.ServerTrait, user: String, msg: List[String]):
-      (State,String) = {
+  def sendTweet(stub: server.ServerTrait,
+    user: String,
+    msg: List[String]): (State,String) = {
     if (msg.isEmpty)
       println("Hey! You must write a message! :P")
     else {
@@ -91,7 +94,7 @@ object Client {
       } else{
         val format = new java.text.SimpleDateFormat("dd-MM-yyyy-HH:mm")
         stub sendTweet(DMTweet(user,message,format.format(new java.util.Date())))
-        println("Tweew sent! :D")
+        println("Tweet sent! :D")
       }
     }
     (MainState,user)
@@ -252,8 +255,10 @@ object Client {
     }
   }
 
-  def getTweets(stub: server.ServerTrait, user: String, list: List[String])
-      : (State,String) = {
+  def getTweets(
+    stub: server.ServerTrait,
+    user: String,
+    list: List[String]): (State,String) = {
     
     val n = list.headOption.map(_.toInt).getOrElse(10)
 
@@ -283,6 +288,8 @@ Message: ${tweet.msg}""")
     f match {
       case "getweets" => getTweets(stub,user,tail)
       case "tweet" => sendTweet(stub,user,tail)
+      case "reply" => (MainState,user)//replyTweet(stub,user,tail)
+      case "directm" => (DirectMState,user)
       case "retweet" => retweet(stub,user,tail)
       case "follow" => funcFollow(stub,user,tail)
       case "unfollow" => funcUnfollow(stub,user,tail)
@@ -300,6 +307,7 @@ Message: ${tweet.msg}""")
         println("\tfollowing => Returns a list of Following profiles")
         println("\tfollowers => Return a list of your followers profiles")
         println("\tprofile => Here you can check and modify your profile")
+        println("\tdirectm => Here you can check and send direct messages")
         println("\tlogout => just... Logout :D")
         println("\t? => show this help")
         println("\nAs you can se, I'm so easy to use ;D")
@@ -312,6 +320,69 @@ Message: ${tweet.msg}""")
     }
   }
 
+  def sendDM(stub: server.ServerTrait, user: String, msg: List[String]): (State,String) = {
+    if (msg.length < 2) 
+      println("Hey! You must write a message and a user!")
+    else {
+      println("Sending you tweet...")
+      val userTo = msg.head
+      val message = msg.tail mkString " "
+
+      if (testTweet(message)) 
+        println("Message so long, short it!")
+      else {
+        val format = new java.text.SimpleDateFormat("dd-MM-yyyy-HH:mm")
+        stub sendDM(DMTweet(user,message,format.format(new java.util.Date())),userTo)
+        println("Message sent! :D")
+      }
+    }
+      (DirectMState,user)
+  }
+
+    def getDM(
+    stub: server.ServerTrait,
+    user: String,
+    list: List[String]): (State,String) = {
+    
+    val n = list.headOption.map(_.toInt).getOrElse(10)
+
+    if (n <= 0)
+      println("Seriously? That's not a real Natural Number!")
+    else {
+      val ret = stub getDM(user,n)
+      ret match {
+        case List() => println("Oh man! you don't have any tweet! :(")
+        case x => x.map(printFormatTweet _)
+      }
+    }
+    (DirectMState,user)
+  }
+
+  def directMRepl(stub: server.ServerTrait, user: String): (State, String) = {
+    val f::tail = readLine("[? for help] DM >>> ").split(" ").toList
+    f match {
+      case "get" => getDM(stub,user,tail)
+      case "send" => sendDM(stub,user,tail)
+      case "answer" => (DirectMState,user)//answerDM(user,tail)
+      case "e" => (MainState,user)
+      case "?" => {
+        println("""
+Well so... checking your private messages eh? Lemme help you!
+    get [N] => Takes your N first DM and shows you
+    send <USER> <MSG> => Sends a private message MSG to USER
+    answer <ID> <MSG> => Sends an answer to a ID tweet with MSG content
+    e => Back to the futu... Main state :D
+    ? => Show this help!!
+""")
+        (DirectMState,user)
+      }
+      case _ => {
+        println("Sorry, I don't understand!")
+        (DirectMState,user)
+      }
+    }
+  }
+
   @tailrec
   def repl(stub: server.ServerTrait, sa: (State, String)): Unit = {
     sa._1 match {
@@ -320,6 +391,7 @@ Message: ${tweet.msg}""")
       case CreateUser => repl(stub,createUserCli(stub))
       case MainState => repl(stub,selectFunction(stub,sa._2))
       case ProfileState => repl(stub,profileRepl(stub,sa._2))
+      case DirectMState => repl(stub,directMRepl(stub,sa._2))
       case Logout => {
         logout(stub,sa._2)
         (Stop,sa._2)
@@ -334,7 +406,6 @@ Message: ${tweet.msg}""")
       val registry = LocateRegistry getRegistry("localhost")
       val stub = registry.lookup("tweetorro").asInstanceOf[server.ServerTrait]
 
-      stub.test(Test(n => println(n)))
       println("Welcome to Tweetorro terminal App!")
       repl(stub,(StartState,""))
     } catch {
