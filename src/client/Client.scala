@@ -34,8 +34,14 @@ object Client {
       val ret = stub login(user,pass)
       if (ret) {
         println("Welcome back! :D")
-        val callback: ClientTrait = new ClientTraitImpl(user)
-        stub registerForCallback(user,callback)
+        // val callback: ClientTrait = new ClientTraitImpl(user)
+        // stub registerForCallback(user,callback)
+        new Thread(new Runnable {
+          def run() {
+            ClientTraitImpl.main(user)
+          }
+        })
+        stub justRegisterMe(user)
         (MainState,user)
       }
       else {

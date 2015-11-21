@@ -6,8 +6,9 @@ import java.rmi.RemoteException
 trait ClientTrait extends Remote { 
   
   @throws(classOf[RemoteException])
-  def notifyMe(): Unit
-  
+  def notifyDM: Unit
+
   @throws(classOf[RemoteException])
-  def getUserName():String
+  def notifyTweets: Unit
+
 }
