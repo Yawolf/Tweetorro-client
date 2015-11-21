@@ -3,6 +3,7 @@ package client
 import java.rmi.server.UnicastRemoteObject
 import java.rmi.registry.Registry
 import java.rmi.registry.LocateRegistry
+import scala.language.postfixOps
 
 class ClientTraitImpl extends ClientTrait {
   
@@ -12,11 +13,12 @@ class ClientTraitImpl extends ClientTrait {
 }
 
 object ClientTraitImpl {
-  def main(name: String): Unit = {
+  def main(name: String, port: Int): Unit = {
     try {
       val cb: ClientTrait = new ClientTraitImpl
       val stub = UnicastRemoteObject.exportObject(cb,0).asInstanceOf[ClientTrait]
-      val registry = LocateRegistry.createRegistry(1099)
+      val port = getRandomPort
+      val registry = LocateRegistry.createRegistry(port)
       registry.rebind(name, stub)
     } catch {
       case e: Exception => e printStackTrace

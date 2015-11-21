@@ -6,6 +6,7 @@ import java.util.Calendar
 import scala.annotation.tailrec
 import scala.language.postfixOps
 import java.rmi.server.UnicastRemoteObject
+import scala.util.Random
 
 sealed abstract class State
 object State {
@@ -34,13 +35,8 @@ object Client {
       val ret = stub login(user,pass)
       if (ret) {
         println("Welcome back! :D")
-        // val callback: ClientTrait = new ClientTraitImpl(user)
-        // stub registerForCallback(user,callback)
-        new Thread(new Runnable {
-          def run() {
-            ClientTraitImpl.main(user)
-          }
-        })
+        val port = getRandomPort
+        createCallback(user,port)
         stub justRegisterMe(user)
         (MainState,user)
       }
@@ -49,6 +45,20 @@ object Client {
         login(stub,t-1)
       }
     }
+  }
+
+  def getRandomPort: Int = {
+    val r = new Random
+    r.nextInt(65535-6969) + 6969
+  }
+
+  def createCallback(user: String, port: Int): Unit = {
+    val cb = new Thread(new Runnable {
+          def run() {
+            ClientTraitImpl.main(user,port)
+          }
+    })
+    cb.start
   }
 
   def createUserCli(stub: server.ServerTrait): (State,String) = {
