@@ -17,7 +17,6 @@ object ClientTraitImpl {
     try {
       val cb: ClientTrait = new ClientTraitImpl
       val stub = UnicastRemoteObject.exportObject(cb,0).asInstanceOf[ClientTrait]
-      val port = getRandomPort
       val registry = LocateRegistry.createRegistry(port)
       registry.rebind(name, stub)
     } catch {

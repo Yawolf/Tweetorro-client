@@ -37,7 +37,7 @@ object Client {
         println("Welcome back! :D")
         val port = getRandomPort
         createCallback(user,port)
-        stub justRegisterMe(user)
+        stub justRegisterMe(user,port)
         (MainState,user)
       }
       else {
