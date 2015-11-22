@@ -195,7 +195,7 @@ class Client {
     val ret = stub logoutRemote(user)
     ret match {
       case true => {
-        cb.stop
+        //cb.stop
         cb.join
         println("User successfully loged out")
         (StartState,user)
@@ -344,6 +344,7 @@ Message: ${tweet.msg}""")
             retweet <tweet_ID> => Retweets de tweet_ID tweet")
             follow user_ID => Start following the user_ID profile")
             unfollow user_ID => Stop following the user_ID profile")
+            search <chain> => Return a list of users whose id's contains chain")
             following => Returns a list of Following profiles")
             followers => Return a list of your followers profiles")
             profile => Here you can check and modify your profile")

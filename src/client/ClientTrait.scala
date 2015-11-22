@@ -10,5 +10,11 @@ trait ClientTrait extends Remote {
 
   @throws(classOf[RemoteException])
   def notifyTweets: Unit
+  
+  @throws(classOf[RemoteException])
+  def stopCallback(name: String): Unit
+  
+  @throws(classOf[RemoteException])
+  def setPort(port: Int): Unit
 
 }
