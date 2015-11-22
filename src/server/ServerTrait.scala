@@ -63,3 +63,6 @@ trait ServerTrait extends Remote {
   @throws(classOf[RemoteException])
   def justRegisterMe(name: String, port: Int): Unit
 }
+
+
+

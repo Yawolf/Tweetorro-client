@@ -23,7 +23,9 @@ object State {
 import State._
 import server.Shared._
 
-object Client {
+class Client {
+
+  var cb: Thread = new Thread
 
   def login(stub: server.ServerTrait, t: Int): (State,String) = {
     if (t < 0) {
@@ -53,7 +55,7 @@ object Client {
   }
 
   def createCallback(user: String, port: Int): Unit = {
-    val cb = new Thread(new Runnable {
+    cb = new Thread(new Runnable {
           def run() {
             ClientTraitImpl.main(user,port)
           }
@@ -193,6 +195,8 @@ object Client {
     val ret = stub logoutRemote(user)
     ret match {
       case true => {
+        cb.stop
+        cb.join
         println("User successfully loged out")
         (StartState,user)
       }
@@ -301,6 +305,18 @@ TweetID: ${tweet.id}
 Message: ${tweet.msg}""")
   }
 
+  def searchUser(stub: server.ServerTrait, l: List[String]): Unit = {
+    if (l.length != 1)
+      println("Hey men! One username at time please! ;)")
+    else {
+      val ret = stub searchUsers(l.head)
+      ret match {
+        case List() => println("No user with that name or similar... :(")
+        case x => x.foreach { x => println(s">>>> User: ${x}") }
+      }
+    }
+  }
+
   def selectFunction(stub: server.ServerTrait,
     user: String): (State,String) = {
     val f::tail = readLine("[? for help] >>> ").split(" ").toList
@@ -310,6 +326,10 @@ Message: ${tweet.msg}""")
       case "reply" => (MainState,user)//replyTweet(stub,user,tail)
       case "directm" => (DirectMState,user)
       case "retweet" => retweet(stub,user,tail)
+      case "search" => {
+        searchUser(stub,tail)
+        (MainState,user)
+      }
       case "follow" => funcFollow(stub,user,tail)
       case "unfollow" => funcUnfollow(stub,user,tail)
       case "following" => getFollows("following",stub,user,tail)
@@ -317,19 +337,20 @@ Message: ${tweet.msg}""")
       case "profile" => (ProfileState,user)
       case "logout" => logout(stub,user)
       case "?" => {
-        println("This is the help, YAY!")
-        println("\tgetweets [N] => receive the first N tweets, default 10 :)")
-        println("\ttweet <message> => Sends a new tweet!")
-        println("\tretweet <tweet_ID> => Retweets de tweet_ID tweet")
-        println("\tfollow user_ID => Start following the user_ID profile")
-        println("\tunfollow user_ID => Stop following the user_ID profile")
-        println("\tfollowing => Returns a list of Following profiles")
-        println("\tfollowers => Return a list of your followers profiles")
-        println("\tprofile => Here you can check and modify your profile")
-        println("\tdirectm => Here you can check and send direct messages")
-        println("\tlogout => just... Logout :D")
-        println("\t? => show this help")
-        println("\nAs you can se, I'm so easy to use ;D")
+        println("""This is the help, YAY!
+            getweets [N] => receive the first N tweets, default 10 :)")
+            tweet <message> => Sends a new tweet!")
+            retweet <tweet_ID> => Retweets de tweet_ID tweet")
+            retweet <tweet_ID> => Retweets de tweet_ID tweet")
+            follow user_ID => Start following the user_ID profile")
+            unfollow user_ID => Stop following the user_ID profile")
+            following => Returns a list of Following profiles")
+            followers => Return a list of your followers profiles")
+            profile => Here you can check and modify your profile")
+            directm => Here you can check and send direct messages")
+            logout => just... Logout :D")
+            ? => show this help")
+            As you can se, I'm so easy to use ;D")""")
         (MainState,user)
       }
       case _ => {
@@ -403,7 +424,7 @@ Well so... checking your private messages eh? Lemme help you!
   }
 
   @tailrec
-  def repl(stub: server.ServerTrait, sa: (State, String)): Unit = {
+  final def repl(stub: server.ServerTrait, sa: (State, String)): Unit = {
     sa._1 match {
       case StartState => repl(stub,startMenu(stub,""))
       case Login => repl(stub,login(stub,3))
@@ -419,14 +440,17 @@ Well so... checking your private messages eh? Lemme help you!
         println("Bye!! See you soon! :D")
     }
   }
+}
 
+object Client {
   def main(args: Array[String]): Unit = {
     try {
+      val client = new Client
       val registry = LocateRegistry getRegistry("localhost")
       val stub = registry.lookup("tweetorro").asInstanceOf[server.ServerTrait]
 
       println("Welcome to Tweetorro terminal App!")
-      repl(stub,(StartState,""))
+      client repl(stub,(StartState,""))
     } catch {
       case e: Exception => e printStackTrace
     }
