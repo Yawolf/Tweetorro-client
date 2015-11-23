@@ -185,29 +185,29 @@ En conclusion, que ha sido todo muy divertido :D
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara">Universidad Politecnica de Madird: <https://www.fi.upm.es/></div></div>
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara">Universidad Politecnica de Madird: https://www.fi.upm.es/</div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara">RMI: <http://docs.oracle.com/javase/7/docs/api/java/rmi/package-summary.html></div></div>
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara">RMI: http://docs.oracle.com/javase/7/docs/api/java/rmi/package-summary.html</div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara">Scala: <http://www.scala-lang.org/></div></div>
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara">Scala: http://www.scala-lang.org/</div></div>
 
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara">JVM: <https://en.wikipedia.org/wiki/Java_virtual_machine></div></div>
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara">JVM: https://en.wikipedia.org/wiki/Java_virtual_machine</div></div>
 
-<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara">SBT: <http://www.scala-sbt.org/></div></div>
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara">SBT: http://www.scala-sbt.org/</div></div>
 
-<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6">6</a></sup> <div class="footpara">REDIS: <http://redis.io/></div></div>
+<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6">6</a></sup> <div class="footpara">REDIS: http://redis.io/</div></div>
 
-<div class="footdef"><sup><a id="fn.7" class="footnum" href="#fnr.7">7</a></sup> <div class="footpara">*Option*: <http://www.scala-lang.org/api/current/index.html#scala.Option></div></div>
+<div class="footdef"><sup><a id="fn.7" class="footnum" href="#fnr.7">7</a></sup> <div class="footpara">Option: http://www.scala-lang.org/api/current/index.html#scala.Option</div></div>
 
-<div class="footdef"><sup><a id="fn.8" class="footnum" href="#fnr.8">8</a></sup> <div class="footpara">Monad Haskell: <https://wiki.haskell.org/Monad></div></div>
+<div class="footdef"><sup><a id="fn.8" class="footnum" href="#fnr.8">8</a></sup> <div class="footpara">Monad Haskell: https://wiki.haskell.org/Monad</div></div>
 
-<div class="footdef"><sup><a id="fn.9" class="footnum" href="#fnr.9">9</a></sup> <div class="footpara">Maybe Haskell: <https://hackage.haskell.org/package/base-4.8.1.0/docs/Data-Maybe.html></div></div>
+<div class="footdef"><sup><a id="fn.9" class="footnum" href="#fnr.9">9</a></sup> <div class="footpara">Maybe Haskell: https://hackage.haskell.org/package/base-4.8.1.0/docs/Data-Maybe.html</div></div>
 
-<div class="footdef"><sup><a id="fn.10" class="footnum" href="#fnr.10">10</a></sup> <div class="footpara">Scala Object: <http://docs.scala-lang.org/tutorials/tour/singleton-objects.html></div></div>
+<div class="footdef"><sup><a id="fn.10" class="footnum" href="#fnr.10">10</a></sup> <div class="footpara">Scala Object: http://docs.scala-lang.org/tutorials/tour/singleton-objects.html</div></div>
 
-<div class="footdef"><sup><a id="fn.11" class="footnum" href="#fnr.11">11</a></sup> <div class="footpara">REPL: <https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop></div></div>
+<div class="footdef"><sup><a id="fn.11" class="footnum" href="#fnr.11">11</a></sup> <div class="footpara">REPL: https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop</div></div>
 
-<div class="footdef"><sup><a id="fn.12" class="footnum" href="#fnr.12">12</a></sup> <div class="footpara">tailrec: <https://en.wikipedia.org/wiki/Tail_call></div></div>
+<div class="footdef"><sup><a id="fn.12" class="footnum" href="#fnr.12">12</a></sup> <div class="footpara">tailrec: https://en.wikipedia.org/wiki/Tail_call</div></div>
 
 
 </div>
