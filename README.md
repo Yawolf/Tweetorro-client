@@ -111,7 +111,7 @@ En la implementacion de nuestro servidor se encuentran todas las funciones que s
 
 La base de datos esta planteada de la siguiente manera:
 
-![img](./bbdd.png)
+![](http://s2.postimg.org/7rmcexdh5/bbdd.png)
 
 ## Tweetorro-cli<a id="orgheadline6"></a>
 
